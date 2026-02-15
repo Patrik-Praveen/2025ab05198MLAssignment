@@ -26,7 +26,6 @@ import xgboost as xgb
 # -------------------------------------------------
 st.set_page_config(page_title="Heart Disease ML Dashboard", layout="wide")
 st.title("❤️ Heart Disease Classification Dashboard")
-st.markdown("Production-Safe Deployment Version")
 
 
 # -------------------------------------------------

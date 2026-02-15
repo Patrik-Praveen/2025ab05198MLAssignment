@@ -109,4 +109,93 @@ if model_option == "Logistic Regression":
     y_pred = model.predict(X_test_scaled)
     y_prob = model.predict_proba(X_test_scaled)[:,1]
 
-elif mod
+elif model_option == "KNN":
+    model = KNeighborsClassifier()
+    model.fit(X_train_scaled, y_train)
+    y_pred = model.predict(X_test_scaled)
+    y_prob = model.predict_proba(X_test_scaled)[:,1]
+
+elif model_option == "Decision Tree":
+    model = DecisionTreeClassifier(random_state=42)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    y_prob = model.predict_proba(X_test)[:,1]
+
+elif model_option == "Naive Bayes":
+    model = GaussianNB()
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    y_prob = model.predict_proba(X_test)[:,1]
+
+elif model_option == "Random Forest":
+    model = RandomForestClassifier(n_estimators=200, random_state=42)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    y_prob = model.predict_proba(X_test)[:,1]
+
+elif model_option == "XGBoost":
+    model = xgb.XGBClassifier(
+        use_label_encoder=False,
+        eval_metric='logloss',
+        random_state=42
+    )
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    y_prob = model.predict_proba(X_test)[:,1]
+
+
+# -------------------------------------------------
+# Metrics
+# -------------------------------------------------
+st.subheader("📈 Model Evaluation Metrics")
+
+col1, col2, col3 = st.columns(3)
+
+col1.metric("Accuracy", round(accuracy_score(y_test, y_pred),3))
+col1.metric("Precision", round(precision_score(y_test, y_pred),3))
+
+col2.metric("Recall", round(recall_score(y_test, y_pred),3))
+col2.metric("F1 Score", round(f1_score(y_test, y_pred),3))
+
+col3.metric("AUC Score", round(roc_auc_score(y_test, y_prob),3))
+col3.metric("MCC Score", round(matthews_corrcoef(y_test, y_pred),3))
+
+
+# -------------------------------------------------
+# Confusion Matrix
+# -------------------------------------------------
+st.subheader("🔢 Confusion Matrix")
+
+cm = confusion_matrix(y_test, y_pred)
+fig, ax = plt.subplots()
+sns.heatmap(cm, annot=True, fmt='d', cmap="Blues")
+st.pyplot(fig)
+
+
+# -------------------------------------------------
+# ROC Curve
+# -------------------------------------------------
+st.subheader("📉 ROC Curve")
+
+fpr, tpr, _ = roc_curve(y_test, y_prob)
+fig2, ax2 = plt.subplots()
+ax2.plot(fpr, tpr)
+ax2.set_xlabel("False Positive Rate")
+ax2.set_ylabel("True Positive Rate")
+ax2.set_title("ROC Curve")
+st.pyplot(fig2)
+
+
+# -------------------------------------------------
+# Feature Importance (Random Forest Bonus)
+# -------------------------------------------------
+if model_option == "Random Forest":
+    st.subheader("🌳 Feature Importance")
+
+    importances = model.feature_importances_
+    feature_df = pd.DataFrame({
+        "Feature": expected_columns,
+        "Importance": importances
+    }).sort_values(by="Importance", ascending=False)
+
+    st.bar_chart(feature_df.set_index("Feature"))
